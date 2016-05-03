@@ -55,15 +55,13 @@ var app = {
   },
 
   addMessage: function(message) {
-    postMessage(message);
-    //on submit, we need to grab the username, text, & roomname
-    //wrap those in an object like below
-    //then send those.
-    //then get those messages & post in the chats section
+    $('#chats').append('<div>Username: ' + message.username + ' Message: ' + message.text + ' Roomname: ' + message.roomname + '</div>');
+
+
   },
 
   addRoom: function (roomname) {
-
+    $('#roomSelect').append(`<option>${roomname}</option>`);
   },
 };
 
@@ -85,7 +83,7 @@ $( document ).ready(function() {
     app.clearMessages();
     var userInput = $('.userInput').val();
     var username = location.search.slice(10); // refactor this later to make it better
-    var roomname = '';
+    var roomname = $('.roomInput').val();
     var message = createMessage(userInput, username, roomname);
     
     app.send(message, url, function() {
@@ -93,6 +91,7 @@ $( document ).ready(function() {
     });
     
     $('.userInput').val('');
+    $('.roomInput').val('');
 
   });
   
@@ -115,9 +114,14 @@ $( document ).ready(function() {
     });
   };
 
-  $('#roomNames').change(function () {
-    roomSelection = $('#roomNames option:selected').text();
-    postMessage(roomSelection);
+  $('#roomSelect').change(function () {
+    roomSelection = $('#roomSelect option:selected').text();
+    if (roomSelection === 'New Room...') {
+      $('.roomInput').show();
+    } else {
+      postMessage(roomSelection);
+      $('.roomInput').hide();
+    }
   });
 
   var updateRooms = function (room) {
@@ -129,24 +133,19 @@ $( document ).ready(function() {
         roomNames.push(roomname);
       }
       roomNames = _.uniq(roomNames);
-      $('#roomNames').empty();
+      $('#roomSelect').empty();
+      $('#roomSelect').append('<option>New Room...</option>');
       _.each(roomNames, function(value, index, collection) {
         if (value === roomSelection) {
-          $('#roomNames').append(`<option selected="selected">${value}</option>`);
+          $('#roomSelect').append(`<option selected="selected">${value}</option>`);
         } else {
-          $('#roomNames').append(`<option>${value}</option>`);
+          $('#roomSelect').append(`<option>${value}</option>`);
         }
       });
     });
   };
 
 });
-
-
-//filter rooms
-//Add new rooms
-//clear the page
-//
 
 //Input room name, then update the 
 
