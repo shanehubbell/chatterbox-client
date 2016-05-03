@@ -2,6 +2,7 @@
 
 var url = 'https://api.parse.com/1/classes/messages';
 var roomSelection;
+var friendList = [];
 
 // http://shebang.brandonmintern.com/foolproof-html-escaping-in-javascript/
 var escapeHtml = function (str) {
@@ -50,14 +51,26 @@ var app = {
     });
   },
 
+  handleSubmit: function () {
+
+  },
+
   clearMessages: function () {
     $('#chats').empty();
   },
 
   addMessage: function(message) {
     $('#chats').append('<div>Username: ' + message.username + ' Message: ' + message.text + ' Roomname: ' + message.roomname + '</div>');
+  },
 
-
+  addFriend: function (friend) {
+    
+    friendList.push(friend);
+    friendList = _.uniq(friendList);
+    $('#friendList').empty();
+    _.each(friendList, function(value, index, collection) {
+      $('#friendList').append(`<option class="${value}">${value}</option>`);
+    });
   },
 
   addRoom: function (roomname) {
@@ -92,9 +105,8 @@ $( document ).ready(function() {
     
     $('.userInput').val('');
     $('.roomInput').val('');
-
   });
-  
+
   var postMessage = function (filterName) {
     app.fetch(url, function (data) {
       $('#chats').empty();
@@ -104,15 +116,19 @@ $( document ).ready(function() {
         var roomname = escapeHtml(data.results[i].roomname);
         if (filterName !== undefined) {
           if (filterName === roomname) {
-            $('#chats').append('<div>Username: ' + username + ' Message: ' + text + ' Roomname: ' + roomname + '</div>');
+            $('#chats').append('<div>Username: ' + '<span class="username">' + username + '</span>' + ' Message: ' + text + ' Roomname: ' + roomname + '</div>');
           }
         } else {
-          $('#chats').append('<div>Username: ' + username + ' Message: ' + text + ' Roomname: ' + roomname + '</div>');
+          $('#chats').append('<div>Username: ' + '<span class="username">' + username + '</span>' + ' Message: ' + text + ' Roomname: ' + roomname + '</div>');
         }
       }
       $('.roomInput').hide();
       roomSelection = filterName;
       updateRooms(filterName);
+      $('.username').click( function() { 
+        var friend = $(this).text();
+        app.addFriend(friend);
+      }); 
     });
   };
 
@@ -148,11 +164,3 @@ $( document ).ready(function() {
   };
 
 });
-
-//Input room name, then update the 
-
-// var message = {
-//   username: 'shawndrost',
-//   text: 'trololo',
-//   roomname: '4chan'
-// };

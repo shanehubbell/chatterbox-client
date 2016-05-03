@@ -17,14 +17,32 @@
   <body>
     <div id="main">
       <h1>chatterbox</h1>
- 
-        <label for="roomSelect">Select a room</label>
-        <select id="roomSelect">
+      
+      <p>
+
+        </select>
+          <label for="roomSelect">Select Room</label>
+          <select id="roomSelect">
           <option selected="selected">New Room...</option>
         </select>
-      <input class="roomInput" type="text" placeholder="Your new chat room here." value=""> 
-      <input class="userInput" type="text" placeholder="Your message here." value="">
-      <button class="submitButton">Submit</button>
+
+        <input class="roomInput" type="text" placeholder="Your new chat room here." value=""> 
+
+      </p>
+
+      <p>
+
+      <label for="friendList">Friend List</label>
+        <select id="friendList">
+        <option selected="selected">You have no friends</option>
+      </select>
+
+      </p>
+      
+      <p>
+        <input class="userInput" type="text" placeholder="Your message here." value="">
+        <button class="submitButton">Submit</button>
+      </p>
       <!-- Your HTML goes here! -->
     </div>
     <div id="chats"></div>
