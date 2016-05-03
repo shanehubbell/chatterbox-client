@@ -2,11 +2,18 @@
 
 var url = 'https://api.parse.com/1/classes/messages';
 
+// http://shebang.brandonmintern.com/foolproof-html-escaping-in-javascript/
+var escapeHtml = function (str) {
+  var div = document.createElement('div');
+  div.appendChild(document.createTextNode(str));
+  return div.innerHTML;
+};
+
 var app = {
   init: function() {
   },
 
-  send: function (message, url) {
+  send: function (message, url, callback) {
     $.ajax({
       // This is the url you should use to communicate with the parse API server.
       url: url,
@@ -15,6 +22,7 @@ var app = {
       contentType: 'application/json',
       success: function (data) {
         console.log('chatterbox: Message sent');
+        callback();
       },
       error: function (data) {
         // See: https://developer.mozilla.org/en-US/docs/Web/API/console.error
@@ -23,15 +31,16 @@ var app = {
     });
   },
 
-  fetch: function (url) {
+  fetch: function (url, callback) {
     $.ajax({
       // This is the url you should use to communicate with the parse API server.
       url: url,
       type: 'GET',
       //data: JSON.stringify(message),
-      contentType: 'application/json',
+      //contentType: 'application/json',
       success: function (data) {
         console.log('chatterbox: Message got');
+        callback(data);
       },
       error: function (data) {
         // See: https://developer.mozilla.org/en-US/docs/Web/API/console.error
@@ -66,19 +75,60 @@ var createMessage = function (text, username, roomname) {
 
 $( document ).ready(function() {
 
+  app.fetch(url, function (data) {
+    updateRooms();
+  });
+
   $('.submitButton').click(function() {
     var userInput = $('.userInput').val();
     var username = location.search.slice(10); // refactor this later to make it better
     var roomname = '';
     var message = createMessage(userInput, username, roomname);
     
-    console.log(message);
+    app.send(message, url, function() {
+      postMessage();
+    });
+    
     $('.userInput').val('');
+
   });
   
+  var postMessage = function () {
+    app.fetch(url, function (data) {
+      for (var i = 0; i < data.results.length; i++) {
+
+        var username = escapeHtml(data.results[i].username);
+        var text = escapeHtml(data.results[i].text);
+        var roomname = escapeHtml(data.results[i].roomname);
+        $('#chats').append('<div>Username: ' + username + ' Message: ' + text + ' Roomname: ' + roomname + '</div>');
+      }
+      updateRooms();
+    });
+  };
+
+  var updateRooms = function () {
+    app.fetch(url, function (data) {
+      var roomNames = [];
+      for (var i = 0; i < data.results.length; i++) {
+        var roomname = escapeHtml(data.results[i].roomname);
+        roomNames.push(roomname);
+      }
+      roomNames = _.uniq(roomNames);
+      _.each(roomNames, function(value, index, collection) {
+        $('#roomNames').append(`<option>${value}</option>`);
+      });
+    });
+  };
+
 });
 
 
+//filter rooms
+//Add new rooms
+//clear the page
+//
+
+//Input room name, then update the 
 
 // var message = {
 //   username: 'shawndrost',
