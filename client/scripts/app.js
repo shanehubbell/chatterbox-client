@@ -83,11 +83,11 @@ $( document ).ready(function() {
     app.clearMessages();
     var userInput = $('.userInput').val();
     var username = location.search.slice(10); // refactor this later to make it better
-    var roomname = $('.roomInput').val();
+    var roomname = $('.roomInput').val() || roomSelection;
     var message = createMessage(userInput, username, roomname);
-    
+
     app.send(message, url, function() {
-      postMessage();
+      postMessage(roomname);
     });
     
     $('.userInput').val('');
@@ -110,7 +110,9 @@ $( document ).ready(function() {
           $('#chats').append('<div>Username: ' + username + ' Message: ' + text + ' Roomname: ' + roomname + '</div>');
         }
       }
-      updateRooms();
+      $('.roomInput').hide();
+      roomSelection = filterName;
+      updateRooms(filterName);
     });
   };
 
@@ -124,7 +126,7 @@ $( document ).ready(function() {
     }
   });
 
-  var updateRooms = function (room) {
+  var updateRooms = function (filterName) {
 
     app.fetch(url, function (data) {
       var roomNames = [];
@@ -134,12 +136,12 @@ $( document ).ready(function() {
       }
       roomNames = _.uniq(roomNames);
       $('#roomSelect').empty();
-      $('#roomSelect').append('<option>New Room...</option>');
+      $('#roomSelect').append('<option class="newRoom">New Room...</option>');
       _.each(roomNames, function(value, index, collection) {
         if (value === roomSelection) {
-          $('#roomSelect').append(`<option selected="selected">${value}</option>`);
+          $('#roomSelect').append(`<option class="${value}" selected="selected">${value}</option>`);
         } else {
-          $('#roomSelect').append(`<option>${value}</option>`);
+          $('#roomSelect').append(`<option class="${value}">${value}</option>`);
         }
       });
     });
