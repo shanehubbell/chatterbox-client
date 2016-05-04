@@ -1,8 +1,11 @@
 // YOUR CODE HERE:
 
 var url = 'https://api.parse.com/1/classes/messages';
-var roomSelection;
+var roomSelection, username;
 var friendList = [];
+
+
+
 
 // http://shebang.brandonmintern.com/foolproof-html-escaping-in-javascript/
 var escapeHtml = function (str) {
@@ -71,11 +74,58 @@ var app = {
     _.each(friendList, function(value, index, collection) {
       $('#friendList').append(`<option class="${value}">${value}</option>`);
     });
+    app.setLocalStorage();
   },
 
   addRoom: function (roomname) {
     $('#roomSelect').append(`<option>${roomname}</option>`);
   },
+
+  setLocalStorage: function () {
+    // if (localStorage.length > 0) {
+    friendListString = JSON.stringify(friendList);
+    localStorage.friends = friendListString;
+    localStorage.username = location.search;
+    localStorage.room = roomSelection;
+    // }
+  },
+
+  updateStoredVariables: function () {
+    if (localStorage.length > 0) {
+      friendList = JSON.parse(localStorage.friends);
+      username = location.search;
+      roomSelection = localStorage.room;
+    }
+  },
+
+  fetchWithParam: function (url, callback) {
+    $.ajax({
+      // This is the url you should use to communicate with the parse API server.
+      url: url,
+      type: 'GET',
+      data: {where:{
+        "roomname":"lobby","username":{
+          "$ne":"drewKosta"}}},
+      //contentType: 'application/json',
+      success: function (data) {
+        console.log('chatterbox: Message got');
+        callback(data);
+      },
+      error: function (data) {
+        // See: https://developer.mozilla.org/en-US/docs/Web/API/console.error
+        console.error('chatterbox: Failed to get message', data);
+      }
+    });
+
+// where={"hometown":
+//         {"$select":
+//           {"query":
+//             {"className":"Team","where":
+//               {"winPct":
+//                 {"$gt":0.5}}},"key":"city"}}}
+
+  }
+
 };
 
 var createMessage = function (text, username, roomname) {
@@ -102,9 +152,10 @@ $( document ).ready(function() {
     app.send(message, url, function() {
       postMessage(roomname);
     });
-    
+
     $('.userInput').val('');
     $('.roomInput').val('');
+    app.setLocalStorage();
   });
 
   var postMessage = function (filterName) {
@@ -140,6 +191,7 @@ $( document ).ready(function() {
       postMessage(roomSelection);
       $('.roomInput').hide();
     }
+    app.setLocalStorage();
   });
 
   var updateRooms = function (filterName) {
@@ -161,6 +213,27 @@ $( document ).ready(function() {
         }
       });
     });
+    app.setLocalStorage();
   };
 
+  $('.newTab').click( function() { 
+    app.fetchWithParam(url, function(data){console.log(data)});
+    //window.open('file:///Users/student/Desktop/2016-04-chatterbox-client/client/index.html' + location.search);    
+  }); 
+
+  // new tab function
+  app.updateStoredVariables();
+  updateRooms(roomSelection);
+
+
 });
+
+//Advanced content
+
+//******  New Tab *****************
+//If we open a new tab, we need to pass in the friend list, and current room to the new version
+
+//******** Unread Messages ******************
+//Use a setTimeOut function to refresh the page every 15 second.  If the users's attention
+//is not on the page, then push the number of NEW messages to the title e.g. (5)
+
